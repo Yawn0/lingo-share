@@ -1,0 +1,37 @@
+---
+config:
+  layout: elk
+---
+flowchart TB
+ subgraph subGraph0["Frontend (React + TS)"]
+        UI["UI Components"]
+        State["Global State / Context"]
+        Net["Native Fetch API"]
+  end
+ subgraph subGraph1["Backend (Node.js Native)"]
+        HttpServer["http.createServer"]
+        ReqParser["Stream Buffer & Router"]
+        Controller["Controllers"]
+        Service["Service Layer"]
+        Repo["Data Access Layer"]
+  end
+ subgraph subGraph2["External World"]
+        DB[("PostgreSQL")]
+        AI["Translation API"]
+  end
+    UI -- User Interaction --> State
+    State -- Request Data --> Net
+    Net -- POST /api/translate --> HttpServer
+    HttpServer -- IncomingMessage Stream --> ReqParser
+    ReqParser -- Parsed JSON Object --> Controller
+    Controller -- Business Logic --> Service
+    Service -- Native fetch --> AI
+    Service -- SQL Query --> Repo
+    Repo -- Persist --> DB
+    AI -. Response .-> Service
+    Service -. Result .-> Controller
+    Controller -. JSON String .-> ReqParser
+    ReqParser -. "res.write" .-> HttpServer
+    HttpServer -. HTTP Response .-> Net
+    Net -. Update State .-> State
+    State -. "Re-render" .-> UI
