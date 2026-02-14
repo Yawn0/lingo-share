@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "es2020",          // Modern JS features
+    "module": "commonjs",        // Node uses CommonJS by default
+    "strict": true,              // no explicit 'any' types allowed
+    "esModuleInterop": true,     // Allows convenient imports
+    "outDir": "./dist",
+    "rootDir": "./src"
+  }
+}
