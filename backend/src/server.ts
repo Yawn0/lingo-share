@@ -1,4 +1,5 @@
 import http, {IncomingMessage, ServerResponse } from 'http';
+import { checkDBConnection } from './db';
 
 const PORT = 3000;
 
@@ -39,8 +40,10 @@ const server = http.createServer(async (req: IncomingMessage, res: ServerRespons
     }
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
     console.log(`Server running on http://localhost:${PORT}`);
+
+    await checkDBConnection();
 });
 
 async function parseBody(req: IncomingMessage): Promise<any> {
