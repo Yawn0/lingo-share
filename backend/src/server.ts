@@ -1,7 +1,11 @@
 import http, {IncomingMessage, ServerResponse } from 'http';
 import { checkDBConnection } from './db';
+import { registerUser } from './services/userService';
 
 const PORT = 3000;
+const status = {
+    OK: 'OK',
+}
 
 const server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
 
@@ -24,9 +28,34 @@ const server = http.createServer(async (req: IncomingMessage, res: ServerRespons
             res.writeHead(200);
             res.end(JSON.stringify(responseData));
         }
+        else if (url === '/api/register' && method === 'POST'){
+            try {
+                const body = await parseBody(req);
+                const newUser = await registerUser(body.email, body.password);
+    
+                res.writeHead(201, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ 
+                    status: status.OK,
+                    message: "User created", 
+                    user: newUser 
+                }))
+            } catch (error: any) {
+                if (error.message === 'User already exists') {
+                    res.writeHead(409); // Conflict
+                    res.end(JSON.stringify({ error: error.message }));
+                } else if (error.message === 'Missing email or password') {
+                    res.writeHead(400);
+                    res.end(JSON.stringify({ error: error.message }));
+                } else {
+                    console.error(error);
+                    res.writeHead(500);
+                    res.end(JSON.stringify({ error: 'Internal Server Error' }));
+                }               
+            }
+        }
         else if(url === '/health' && method === 'GET'){
             res.writeHead(200);
-            res.end(JSON.stringify({status: 'OK'}));
+            res.end(JSON.stringify({status: status.OK}));
         }
         else{
             res.writeHead(404);
