@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const pool = new Pool({
+export const pool = new Pool({
   user: process.env.DB_USER || 'admin',
   host: process.env.DB_HOST || 'localhost',
   database: process.env.DB_NAME || 'lingoshare',
@@ -37,6 +37,5 @@ export const checkDBConnection = async () => {
     }
     catch(error){
         console.error('Database connection failed', error);
-        process.exit(1);// Kill server if DB is down
     }
 }
