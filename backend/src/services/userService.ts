@@ -1,22 +1,9 @@
 import { randomBytes, scrypt } from "crypto";
 import { promisify } from "util";
 import { query } from "../db";
-
-export const ERROR_MESSAGE = {
-    mail_or_pass_missing: "Email or password missing",
-    pass_length: "Password must be at least 6 characters long",
-    invalid_mail: "Invalid email",
-    user_exists: "User already exists",
-}
+import { QueryFunction, isEmail, ERROR_MESSAGE } from "./Utility/util";
 
 const scryptAsync = promisify(scrypt);
-
-export type QueryFunction = (text: string, params?: any[]) => Promise<any>
-
-function isEmail(email: string) {
-    const emailRegex = /^(?!\.)(?!.*\.\.)[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]*[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/;
-    return emailRegex.test(email);
-}
 
 export const registerUser = async (
     email: string, 

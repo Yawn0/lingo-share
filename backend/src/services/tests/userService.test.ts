@@ -1,4 +1,5 @@
-import { ERROR_MESSAGE, registerUser } from "../userService";
+import { registerUser } from "../userService";
+import { ERROR_MESSAGE } from "../Utility/util";
 
 const mockDbResponse = (rows: any[]) => Promise.resolve({ rowCount: rows.length, rows})
 .catch(error => console.error('Mock DB Error:', error));
