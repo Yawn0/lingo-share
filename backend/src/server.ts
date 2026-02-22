@@ -77,7 +77,11 @@ const server = http.createServer(async (req: IncomingMessage, res: ServerRespons
                 if (error.message === ERROR_MESSAGE.user_exists) {
                     res.writeHead(409); // Conflict
                     res.end(JSON.stringify({ error: error.message }));
-                } else if (error.message === ERROR_MESSAGE.mail_or_pass_missing) {
+                } else if (
+                    error.message === ERROR_MESSAGE.mail_or_pass_missing ||
+                    error.message === ERROR_MESSAGE.invalid_mail ||
+                    error.message === ERROR_MESSAGE.pass_length
+                ) {
                     res.writeHead(400);
                     res.end(JSON.stringify({ error: error.message }));
                 } else {

@@ -8,7 +8,7 @@ export const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
   database: process.env.DB_NAME || 'lingoshare',
   password: process.env.DB_PASSWORD || 'password123',
-  port: 5432,
+  port: Number(process.env.DB_PORT) || 5432,
   max: 10, // Max number of clients in the pool
   idleTimeoutMillis: 30000 // Close clients after 30 seconds of inactivity
 });
