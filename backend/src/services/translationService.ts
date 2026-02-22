@@ -40,10 +40,17 @@ export async function translateText(
         returning id
     `;
 
-    const result = await dbQuery(
-        queryText, 
-        [request.userId, request.sourceLangId, request.targetlangId, request.text, translatedText]
-    );
+    try{
+        const result = await dbQuery(
+            queryText, 
+            [request.userId, request.sourceLangId, request.targetlangId, request.text, translatedText]
+        );
 
-    return { translatedText: translatedText, id: result.rows[0].id };
+        const id = result?.rows?.[0]?.id;
+        if(!id) return null;
+
+        return { translatedText: translatedText, id: id };
+    } catch{
+        return null;
+    }
 }

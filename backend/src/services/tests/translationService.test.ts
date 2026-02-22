@@ -7,16 +7,16 @@ const request: TranslationRequest = {
     targetlangId: 1
 }
 
-const mockDbQuery = jest.fn().mockImplementation(
-    async (text: string, params: any[]) => {
-        return { id: 1 };   
-    }
-)
-
 describe('translationService: translateText', () => {
     it('should translate text correctly', async () => {
+        const mockDbQuery = jest.fn().mockImplementation(
+            async (text: string, params: any[]) => {
+                return { rows: [{ id: 1 }] };   
+            }
+        );
+
         const result = await translateText(request, mockDbQuery);
-        expect(result).toEqual({ id: 1 });
+        expect(result).toEqual({ translatedText: 'txeT', id: 1 });
         expect(mockDbQuery).toHaveBeenCalledTimes(1);
         expect(mockDbQuery).toHaveBeenCalledWith(
             expect.stringContaining('insert into translations'),
@@ -30,11 +30,13 @@ describe('translationService: translateText', () => {
         )
     })
     it('should return null if text is empty', async () => {
+        const mockDbQuery = jest.fn();
         const result = await translateText({ ...request, text: '' }, mockDbQuery);
         expect(result).toBeNull();
         expect(mockDbQuery).toHaveBeenCalledTimes(0);
     })
     it('should return null if db query throws error', async () => {
+        const mockDbQuery = jest.fn();
         mockDbQuery.mockImplementationOnce(
             async (text: string, params: any[]) => {
                 throw new Error('DB Error');
