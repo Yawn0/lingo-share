@@ -1,10 +1,14 @@
 import http, {IncomingMessage, ServerResponse } from 'http';
 import { checkDBConnection } from './db';
 import { registerUser } from './services/userService';
+import { ERROR_MESSAGE } from './services/Utility/util';
 
 const PORT = 3000;
-const status = {
+const STATUS = {
     OK: 'OK',
+}
+const ERROR = {
+    internal_server_error: 'Internal Server Error'
 }
 
 const server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
@@ -35,27 +39,36 @@ const server = http.createServer(async (req: IncomingMessage, res: ServerRespons
     
                 res.writeHead(201, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ 
-                    status: status.OK,
+                    status: STATUS.OK,
                     message: "User created", 
                     user: newUser 
                 }))
             } catch (error: any) {
-                if (error.message === 'User already exists') {
+                if (error.message === ERROR_MESSAGE.user_exists) {
                     res.writeHead(409); // Conflict
                     res.end(JSON.stringify({ error: error.message }));
-                } else if (error.message === 'Missing email or password') {
+                } else if (error.message === ERROR_MESSAGE.mail_or_pass_missing) {
                     res.writeHead(400);
                     res.end(JSON.stringify({ error: error.message }));
                 } else {
                     console.error(error);
                     res.writeHead(500);
-                    res.end(JSON.stringify({ error: 'Internal Server Error' }));
+                    res.end(JSON.stringify({ error: ERROR.internal_server_error }));
                 }               
             }
         }
         else if(url === '/health' && method === 'GET'){
             res.writeHead(200);
-            res.end(JSON.stringify({status: status.OK}));
+            res.end(JSON.stringify({status: STATUS.OK}));
+        }
+        else if(url === '/dbhealth' && method === 'GET'){
+            if(await checkDBConnection()){
+                res.writeHead(200);
+                res.end(JSON.stringify({status: STATUS.OK}));
+            } 
+            else{
+                throw Error('Database error');
+            }
         }
         else{
             res.writeHead(404);
@@ -65,7 +78,7 @@ const server = http.createServer(async (req: IncomingMessage, res: ServerRespons
     catch(error){
         console.error(error);
         res.writeHead(500);
-        res.end(JSON.stringify({error: 'Internal Server Error'}));
+        res.end(JSON.stringify({error: ERROR.internal_server_error}));
     }
 });
 
