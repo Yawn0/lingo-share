@@ -9,18 +9,41 @@ const mockExternalTranslationAPI = async (text: string): Promise<string> => {
     })
 }
 
-function translateText(
+export type TranslationResponse = {
+    translatedText: string,
+    id: number
+}
+
+export type TranslationRequest = {
     userId: number, 
     text: string, 
     sourceLangId: number, 
-    targetlangId: number, 
-    dbQuery: QueryFunction = query){
+    targetlangId: number
+}
 
-    // 1. Validate inputs (Don't translate empty strings)
+export async function translateText(
+    request: TranslationRequest,
+    dbQuery: QueryFunction = query): Promise<TranslationResponse | null>{
 
-    // 2. Call the external translation API (use the mock above, or native fetch)
+    if(!(request.text?.trim())) return null;
 
-    // 3. Save the result to the db 'translations' table
+    const translatedText: string = await mockExternalTranslationAPI(request.text);
+    
+    const queryText = `
+        insert into translations (
+            user_id,
+            source_lang_id,
+            target_lang_id,
+            original_text,
+            translated_text
+        ) values ($1, $2, $3, $4, $5)
+        returning id
+    `;
 
-    // 4. Return an object containing the original text, the translation, and the DB id.
+    const result = await dbQuery(
+        queryText, 
+        [request.userId, request.sourceLangId, request.targetlangId, request.text, translatedText]
+    );
+
+    return { translatedText: translatedText, id: result.rows[0].id };
 }

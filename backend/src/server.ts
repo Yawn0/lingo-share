@@ -2,47 +2,77 @@ import http, {IncomingMessage, ServerResponse } from 'http';
 import { checkDBConnection } from './db';
 import { registerUser } from './services/userService';
 import { ERROR_MESSAGE } from './services/Utility/util';
+import { translateText, TranslationResponse, TranslationRequest } from './services/translationService'
 
 const PORT = 3000;
 const STATUS = {
     OK: 'OK',
 }
 const ERROR = {
-    internal_server_error: 'Internal Server Error'
+    internal_server_error: 'Internal Server Error',
+    payload_too_large: 'Payload Too Large'
 }
 
 const server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
 
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*'); //allow react to connect
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
     const { method, url } = req;
+
+    if (method === 'OPTIONS') {
+        res.writeHead(204);
+        res.end();
+        return;
+    }
 
     console.log(`[${method}] ${url}`);
 
     try{
-        if(url === 'api/translate' && method === 'POST'){
+        if(url === '/api/translate' && method === 'POST'){
             const body = await parseBody(req);
 
+            if(!body.userId 
+                || !body.sourceLangId
+                || !body.targetlangId
+            ){
+                res.writeHead(400);
+                res.end(JSON.stringify({ error: 'Invalid input' }));
+                return;
+            }
+
+            const request = {
+                userId: body.userId,
+                text: body.text,
+                sourceLangId: body.sourceLangId,
+                targetlangId: body.targetlangId
+            } as TranslationRequest;
+
+            const response: TranslationResponse | null = await translateText(request);
+
             const responseData = {
-                message: 'Data received!',
-                received: body
+                status: STATUS.OK,
+                response: response
             };
 
-            res.writeHead(200);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(responseData));
         }
         else if (url === '/api/register' && method === 'POST'){
             try {
                 const body = await parseBody(req);
                 const newUser = await registerUser(body.email, body.password);
-    
-                res.writeHead(201, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ 
+
+                const responseData = { 
                     status: STATUS.OK,
                     message: "User created", 
                     user: newUser 
-                }))
+                };
+    
+                res.writeHead(201, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(responseData))
             } catch (error: any) {
                 if (error.message === ERROR_MESSAGE.user_exists) {
                     res.writeHead(409); // Conflict
@@ -59,12 +89,12 @@ const server = http.createServer(async (req: IncomingMessage, res: ServerRespons
         }
         else if(url === '/health' && method === 'GET'){
             res.writeHead(200);
-            res.end(JSON.stringify({status: STATUS.OK}));
+            res.end(JSON.stringify({ status: STATUS.OK }));
         }
         else if(url === '/dbhealth' && method === 'GET'){
             if(await checkDBConnection()){
                 res.writeHead(200);
-                res.end(JSON.stringify({status: STATUS.OK}));
+                res.end(JSON.stringify({ status: STATUS.OK }));
             } 
             else{
                 throw Error('Database error');
@@ -77,6 +107,13 @@ const server = http.createServer(async (req: IncomingMessage, res: ServerRespons
     }
     catch(error){
         console.error(error);
+
+        if (error instanceof Error && error.message === ERROR.payload_too_large) {
+            res.writeHead(413);
+            res.end(JSON.stringify({error: error.message}));
+            return;
+        }
+
         res.writeHead(500);
         res.end(JSON.stringify({error: ERROR.internal_server_error}));
     }
@@ -101,7 +138,7 @@ async function parseBody(req: IncomingMessage): Promise<any> {
             
             if(exceedsMaxSize(body + chunk)){
                 req.destroy();
-                reject(new Error('PayloadToolarge'));
+                reject(new Error(ERROR.payload_too_large));
                 return;
             }
             
