@@ -13,9 +13,9 @@ CREATE TABLE IF NOT EXISTS languages (
 
 CREATE TABLE IF NOT EXISTS translations (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    source_lang_id INTEGER REFERENCES languages(id),
-    target_lang_id INTEGER REFERENCES languages(id),
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    source_lang_id INTEGER NOT NULL REFERENCES languages(id),
+    target_lang_id INTEGER NOT NULL REFERENCES languages(id),
     original_text TEXT NOT NULL,
     translated_text TEXT NOT NULL,
     provider VARCHAR(50), -- e.g. 'google', 'openai'
