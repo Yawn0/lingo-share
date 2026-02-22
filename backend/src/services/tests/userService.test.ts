@@ -13,12 +13,14 @@ describe('userService: RegisterUser', () => {
         // expecting 2 calls : 
         // 1. select (check existing) => return empty array 
         // 2. insert (save user info) => return the new user info
-        const mockDbQuery = jest.fn().mockImplementation(async (text: string, params: any[]) => {
-            if(text.includes('select id from users')) return mockDbResponse([]); // no user found
-            if(text.includes('insert into users')) return mockDbResponse([{id: 1, email: email, created_at: new Date()}]);
+        const mockDbQuery = jest.fn().mockImplementation(
+            async (text: string, params: any[]) => {
+                if(text.includes('select id from users')) return mockDbResponse([]); // no user found
+                if(text.includes('insert into users')) return mockDbResponse([{id: 1, email: email, created_at: new Date()}]);
 
-            throw Error('Unexpected query');
-        });
+                throw Error('Unexpected query');
+            }
+        );
 
         const result = await registerUser(email, password, mockDbQuery);
         
