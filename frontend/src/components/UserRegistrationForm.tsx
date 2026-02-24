@@ -19,7 +19,7 @@ export default function UserRegistrationForm(props: UserRegistrationFormProps) {
             setError(null);
             const response: UserRegistrationResponse = await registerUser(email, password);
             setResponse(response);
-            props.setLoggedInUserId(response.userId ?? null);
+            props.setLoggedInUserId(response.user?.id ?? null);
         }
         catch (error) {
             setResponse(null);

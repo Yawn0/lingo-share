@@ -34,9 +34,11 @@ const server = http.createServer(async (req: IncomingMessage, res: ServerRespons
         if(url === '/api/translate' && method === 'POST'){
             const body = await parseBody(req);
 
+            console.log(body)
+
             if(!body.userId 
                 || !body.sourceLangId
-                || !body.targetlangId
+                || !body.targetLangId
             ){
                 res.writeHead(400);
                 res.end(JSON.stringify({ error: 'Invalid input' }));
@@ -47,7 +49,7 @@ const server = http.createServer(async (req: IncomingMessage, res: ServerRespons
                 userId: body.userId,
                 text: body.text,
                 sourceLangId: body.sourceLangId,
-                targetLangId: body.targetlangId
+                targetLangId: body.targetLangId
             } as TranslationRequest;
 
             const response: TranslationResponse | null = await translateText(request);

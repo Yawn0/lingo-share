@@ -7,8 +7,11 @@ const ENDPOINT = {
 export type UserRegistrationResponse = {
     status?: string,
     message?: string,
-    userId?: number,
-    user?: Record<string, unknown>,
+    user?: {
+        id: number,
+        email: string,
+        created_at: string
+    },
     error?: string
 }
 
@@ -64,6 +67,7 @@ export async function translateText(request: TranslationRequest){
     })
 
     const response : TranslationResponse = await res.json();
+    console.log(response)
 
     if(!res.ok){
         throw Error(response.error ?? `Error calling ${ENDPOINT.translateText}`)

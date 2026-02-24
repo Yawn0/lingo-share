@@ -26,7 +26,10 @@ export default function TranslationUI(props: TranslationUIProps){
         try{
             setError(null)
             setIsLoading(true)
+            console.log(request)
             const result: TranslationResponse = await translateText(request);
+            console.log(result)
+
             if(result.translatedText){
                 setTranslatedText(result.translatedText)
             }
