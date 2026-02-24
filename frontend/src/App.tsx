@@ -1,11 +1,19 @@
+import { useState } from 'react';
 import './App.css'
-import RegisterForm from './components/RegisterForm'
+import UserRegistrationForm from './components/UserRegistrationForm'
+import TranslationUI from './components/TranslationUI';
 
 function App() {
 
+  const [loggedInUserId, setLoggedInUserId] = useState<number | null>(null);
+
   return (
     <main>
-      <RegisterForm />
+      {loggedInUserId ? (
+        <TranslationUI userId={loggedInUserId} />
+      ) : (
+        <UserRegistrationForm setLoggedInUserId = { setLoggedInUserId }/>
+      )}
     </main>
   )
 }

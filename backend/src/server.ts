@@ -47,7 +47,7 @@ const server = http.createServer(async (req: IncomingMessage, res: ServerRespons
                 userId: body.userId,
                 text: body.text,
                 sourceLangId: body.sourceLangId,
-                targetlangId: body.targetlangId
+                targetLangId: body.targetlangId
             } as TranslationRequest;
 
             const response: TranslationResponse | null = await translateText(request);

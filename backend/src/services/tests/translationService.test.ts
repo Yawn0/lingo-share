@@ -4,7 +4,7 @@ const request: TranslationRequest = {
     userId: 1, 
     text: 'Text', 
     sourceLangId: 1, 
-    targetlangId: 1
+    targetLangId: 1
 }
 
 describe('translationService: translateText', () => {
@@ -23,7 +23,7 @@ describe('translationService: translateText', () => {
             expect.arrayContaining([
                 request.userId,
                 request.sourceLangId,
-                request.targetlangId,
+                request.targetLangId,
                 request.text,
                 expect.stringContaining(request.text)
             ])

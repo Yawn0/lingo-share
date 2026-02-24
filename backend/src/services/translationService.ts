@@ -18,7 +18,7 @@ export type TranslationRequest = {
     userId: number, 
     text: string, 
     sourceLangId: number, 
-    targetlangId: number
+    targetLangId: number
 }
 
 export async function translateText(
@@ -43,7 +43,7 @@ export async function translateText(
     try{
         const result = await dbQuery(
             queryText, 
-            [request.userId, request.sourceLangId, request.targetlangId, request.text, translatedText]
+            [request.userId, request.sourceLangId, request.targetLangId, request.text, translatedText]
         );
 
         const id = result?.rows?.[0]?.id;
