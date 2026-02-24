@@ -25,49 +25,57 @@ export default function TranslationUI(props: TranslationUIProps){
 
         try{
             setError(null)
+
+            if(!(request.text.trim())){
+                setTranslatedText('')
+                return;
+            }
+
             setIsLoading(true)
-            console.log(request)
             const result: TranslationResponse = await translateText(request);
-            console.log(result)
 
             if(result.translatedText){
                 setTranslatedText(result.translatedText)
             }
         }
         catch(error){
-            setIsLoading(false)
             setError(error instanceof Error ? error : new Error(String(error)));
+        }
+        finally{
+            setIsLoading(false)
         }
     }
     
     return(
-        <form onSubmit={handleFormSubmit}>
-            {error && <p style = {{color:'red'}}>{error.message}</p>}
-            <textarea
-                value={text}
-                aria-label = "Text to translate"
-                placeholder = "Enter text to translate"
-                onChange = {(e) => setText(e.target.value)}
-            ></textarea>
-            <select title="Select source language"
-                value = {sourceLangId}
-                onChange = {(e) => setSourceLangId(Number(e.target.value))}>
-                <option value={1}>English</option>
-                <option value={2}>Spanish</option>
-                <option value={3}>French</option>
-                <option value={4}>German</option>
-            </select>
-            <select title="Select target language"
-                value = {targetLangId}
-                onChange = {(e) => setTargetLangId(Number(e.target.value))}>
-                <option value={1}>English</option>
-                <option value={2}>Spanish</option>
-                <option value={3}>French</option>
-                <option value={4}>German</option>
-            </select>
+        <>
+            <form onSubmit={handleFormSubmit}>
+                {error && <p style = {{color:'red'}}>{error.message}</p>}
+                <textarea
+                    value={text}
+                    aria-label = "Text to translate"
+                    placeholder = "Enter text to translate"
+                    onChange = {(e) => setText(e.target.value)}
+                ></textarea>
+                <select title="Select source language"
+                    value = {sourceLangId}
+                    onChange = {(e) => setSourceLangId(Number(e.target.value))}>
+                    <option value={1}>English</option>
+                    <option value={2}>Spanish</option>
+                    <option value={3}>French</option>
+                    <option value={4}>German</option>
+                </select>
+                <select title="Select target language"
+                    value = {targetLangId}
+                    onChange = {(e) => setTargetLangId(Number(e.target.value))}>
+                    <option value={1}>English</option>
+                    <option value={2}>Spanish</option>
+                    <option value={3}>French</option>
+                    <option value={4}>German</option>
+                </select>
 
-            <button type="submit" disabled={isLoading}>Translate</button>
+                <button type="submit" disabled={isLoading}>Translate</button>
+            </form>
             <p style={{color:'green'}}>{translatedText}</p>
-        </form>
+        </>
     )
 }

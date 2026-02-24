@@ -54,13 +54,8 @@ const server = http.createServer(async (req: IncomingMessage, res: ServerRespons
 
             const response: TranslationResponse | null = await translateText(request);
 
-            const responseData = {
-                status: STATUS.OK,
-                response: response
-            };
-
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(responseData));
+            res.end(JSON.stringify(response));
         }
         else if (url === '/api/register' && method === 'POST'){
             try {

@@ -10,7 +10,7 @@ function App() {
   return (
     <main>
       {loggedInUserId ? (
-        <TranslationUI userId={loggedInUserId} />
+        <TranslationUI userId = { loggedInUserId } />
       ) : (
         <UserRegistrationForm setLoggedInUserId = { setLoggedInUserId }/>
       )}
