@@ -10,7 +10,9 @@ const STATUS = {
 }
 const ERROR = {
     internal_server_error: 'Internal Server Error',
-    payload_too_large: 'Payload Too Large'
+    payload_too_large: 'Payload Too Large',
+    page_not_found: 'Page not found',
+    invalid_input: 'Invalid input'
 }
 
 const server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
@@ -131,6 +133,14 @@ async function historyEndpoint(req: IncomingMessage, res: ServerResponse<http.In
         const parsedUrl = new URL(url, `http://${req.headers.host}`);
         const userId = parsedUrl.searchParams.get('userId');
 
+        console.log(userId)
+
+        if(!userId){
+            res.writeHead(400);
+            res.end(JSON.stringify({ error: ERROR.page_not_found }));
+            return;
+        }
+
         const responseData = await getTranslationsByUserId(Number(userId))
 
         console.log(responseData)
@@ -209,7 +219,7 @@ async function translateEndpoint(req: IncomingMessage, res: ServerResponse<http.
         || !body.targetLangId
     ){
         res.writeHead(400);
-        res.end(JSON.stringify({ error: 'Invalid input' }));
+        res.end(JSON.stringify({ error: ERROR.invalid_input }));
         return;
     }
 

@@ -102,10 +102,9 @@ export async function login(email: string, password: string){
 }
 
 export async function getHistoryData(userId: number){
-    const res = await fetch(`${BASE_URL}${ENDPOINT.getHistoryData}`, {
+    const res = await fetch(`${BASE_URL}${ENDPOINT.getHistoryData}?userId=${userId}`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json'},
-        body: JSON.stringify(userId)
+        headers: { 'Content-Type': 'application/json'}
     })
     
     if(!res.ok){
