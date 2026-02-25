@@ -1,8 +1,8 @@
-import { useState, type Dispatch, type SetStateAction} from "react";
+import { useState} from "react";
 import { registerUser, type UserRegistrationResponse } from "../services/api";
 
 type UserRegistrationFormProps = {
-    setLoggedInUserId: Dispatch<SetStateAction<number | null>>;
+    setLoggedInUserId: (userId: number | null) => void;
 };
 
 export default function UserRegistrationForm(props: UserRegistrationFormProps) {
@@ -30,6 +30,7 @@ export default function UserRegistrationForm(props: UserRegistrationFormProps) {
 
     return (
         <form onSubmit={handleFormSubmit}>
+            <h2>Registration form</h2>
             {response && <p style={{color: 'green'}}>{response.message}</p>}
             <input
             type='email'

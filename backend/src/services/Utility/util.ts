@@ -3,6 +3,7 @@ export const ERROR_MESSAGE = {
     pass_length: "Password must be at least 6 characters long",
     invalid_mail: "Invalid email",
     user_exists: "User already exists",
+    mail_or_pass_invalid: "Invalid email or password"
 }
 
 export type QueryFunction = (text: string, params?: any[]) => Promise<any>
