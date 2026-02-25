@@ -1,11 +1,11 @@
 const BASE_URL = 'http://localhost:3000/api';
 const ENDPOINT = {
     registerUser: '/register',
-    translateText: '/translate'
+    translateText: '/translate',
+    login: '/login'
 }
 
 export type UserRegistrationResponse = {
-    status?: string,
     message?: string,
     user?: {
         id: number,
@@ -74,4 +74,24 @@ export async function translateText(request: TranslationRequest){
     }
 
     return response;
+}
+
+export async function login(email: string, password: string){
+
+    const request = { email, password }
+
+    const res = await fetch(`${BASE_URL}${ENDPOINT.login}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'},
+        body: JSON.stringify(request)
+    })
+
+    const response = await res.json();
+    console.log(response)
+
+    if(!res.ok){
+        throw Error(response.error ?? `Error calling ${ENDPOINT.login}`)
+    }
+
+    return response.id;
 }

@@ -1,6 +1,6 @@
 import http, {IncomingMessage, ServerResponse } from 'http';
 import { checkDBConnection } from './db';
-import { registerUser } from './services/userService';
+import { authenticateUser, registerUser } from './services/userService';
 import { ERROR_MESSAGE } from './services/Utility/util';
 import { translateText, TranslationResponse, TranslationRequest } from './services/translationService'
 
@@ -32,61 +32,13 @@ const server = http.createServer(async (req: IncomingMessage, res: ServerRespons
 
     try{
         if(url === '/api/translate' && method === 'POST'){
-            const body = await parseBody(req);
-
-            console.log(body)
-
-            if(!body.userId 
-                || !body.sourceLangId
-                || !body.targetLangId
-            ){
-                res.writeHead(400);
-                res.end(JSON.stringify({ error: 'Invalid input' }));
-                return;
-            }
-
-            const request = {
-                userId: body.userId,
-                text: body.text,
-                sourceLangId: body.sourceLangId,
-                targetLangId: body.targetLangId
-            } as TranslationRequest;
-
-            const response: TranslationResponse | null = await translateText(request);
-
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(response));
+            await translateEndpoint(req, res);
         }
         else if (url === '/api/register' && method === 'POST'){
-            try {
-                const body = await parseBody(req);
-                const newUser = await registerUser(body.email, body.password);
-
-                const responseData = { 
-                    status: STATUS.OK,
-                    message: "User created", 
-                    user: newUser 
-                };
-    
-                res.writeHead(201, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(responseData))
-            } catch (error: any) {
-                if (error.message === ERROR_MESSAGE.user_exists) {
-                    res.writeHead(409); // Conflict
-                    res.end(JSON.stringify({ error: error.message }));
-                } else if (
-                    error.message === ERROR_MESSAGE.mail_or_pass_missing ||
-                    error.message === ERROR_MESSAGE.invalid_mail ||
-                    error.message === ERROR_MESSAGE.pass_length
-                ) {
-                    res.writeHead(400);
-                    res.end(JSON.stringify({ error: error.message }));
-                } else {
-                    console.error(error);
-                    res.writeHead(500);
-                    res.end(JSON.stringify({ error: ERROR.internal_server_error }));
-                }               
-            }
+            await registerEndpoint(req, res);
+        }
+        else if (url === '/api/login' && method === 'POST'){
+            await loginEndPoint(req, res);
         }
         else if(url === '/health' && method === 'GET'){
             res.writeHead(200);
@@ -169,3 +121,85 @@ async function parseBody(req: IncomingMessage): Promise<any> {
         })
     })
 } 
+
+async function loginEndPoint(req: IncomingMessage, res: ServerResponse<http.IncomingMessage>){
+    try {
+        const body = await parseBody(req);
+        const user = await authenticateUser(body.email, body.password);
+
+        const responseData = { 
+            id: user.id,
+            email: user.email
+        };
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(responseData))
+    } catch (error: any) {
+        if (error.message === ERROR_MESSAGE.mail_or_pass_invalid){
+            res.writeHead(401);
+            res.end(JSON.stringify({ error: error.message }));
+        } else {
+            console.error(error);
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: ERROR.internal_server_error }));
+        }               
+    }
+}
+
+async function registerEndpoint(req: IncomingMessage, res: ServerResponse<http.IncomingMessage>){
+    try {
+        const body = await parseBody(req);
+        const newUser = await registerUser(body.email, body.password);
+
+        const responseData = { 
+            message: "User created", 
+            user: newUser 
+        };
+
+        res.writeHead(201, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(responseData))
+    } catch (error: any) {
+        if (error.message === ERROR_MESSAGE.user_exists) {
+            res.writeHead(409); // Conflict
+            res.end(JSON.stringify({ error: error.message }));
+        } else if (
+            error.message === ERROR_MESSAGE.mail_or_pass_missing ||
+            error.message === ERROR_MESSAGE.invalid_mail ||
+            error.message === ERROR_MESSAGE.pass_length
+        ) {
+            res.writeHead(400);
+            res.end(JSON.stringify({ error: error.message }));
+        } else {
+            console.error(error);
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: ERROR.internal_server_error }));
+        }               
+    }
+}
+
+async function translateEndpoint(req: IncomingMessage, res: ServerResponse<http.IncomingMessage>){
+    const body = await parseBody(req);
+
+    console.log(body)
+
+    if(!body.userId 
+        || !body.sourceLangId
+        || !body.targetLangId
+    ){
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: 'Invalid input' }));
+        return;
+    }
+
+    const request = {
+        userId: body.userId,
+        text: body.text,
+        sourceLangId: body.sourceLangId,
+        targetLangId: body.targetLangId
+    } as TranslationRequest;
+
+    const response: TranslationResponse | null = await translateText(request);
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(response));
+}
