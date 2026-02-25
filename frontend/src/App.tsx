@@ -2,7 +2,7 @@ import { useState } from 'react';
 import './App.css'
 import UserRegistrationForm from './components/UserRegistrationForm'
 import TranslationUI from './components/TranslationUI';
-import LoginForm from './components/loginForm';
+import LoginForm from './components/LoginForm';
 
 function App() {
 

@@ -2,7 +2,8 @@ const BASE_URL = 'http://localhost:3000/api';
 const ENDPOINT = {
     registerUser: '/register',
     translateText: '/translate',
-    login: '/login'
+    login: '/login',
+    getHistoryData: '/history',
 }
 
 export type UserRegistrationResponse = {
@@ -28,6 +29,10 @@ export type TranslationResponse = {
     sourceLangId?: number, 
     targetLangId?: number,
     error?: string
+}
+
+export type UserTranslationObjectResponse = {
+    translations: [string,string][];
 }
 
 // async function apiCall<TRequest, TResponse>
@@ -94,4 +99,21 @@ export async function login(email: string, password: string){
     }
 
     return response.id;
+}
+
+export async function getHistoryData(userId: number){
+    const res = await fetch(`${BASE_URL}${ENDPOINT.getHistoryData}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json'},
+        body: JSON.stringify(userId)
+    })
+    
+    if(!res.ok){
+        return null;
+    }
+
+    const response: UserTranslationObjectResponse = await res.json();
+    console.log(response)
+
+    return response;
 }

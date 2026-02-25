@@ -1,5 +1,5 @@
 import { query } from "../db";
-import { QueryFunction } from "./Utility/util";
+import { ERROR_MESSAGE, QueryFunction } from "./Utility/util";
 
 const mockExternalTranslationAPI = async (text: string): Promise<string> => {
     return new Promise((resolve) => {
@@ -19,6 +19,10 @@ export type TranslationRequest = {
     text: string, 
     sourceLangId: number, 
     targetLangId: number
+}
+
+export type UserTranslationObject = {
+    translations: [string, string][]
 }
 
 export async function translateText(
@@ -52,5 +56,40 @@ export async function translateText(
         return { translatedText: translatedText, id: id };
     } catch{
         return null;
+    }
+}
+
+export async function getTranslationsByUserId(
+    userId: number,
+    dbQuery: QueryFunction = query){
+
+    if(!userId) return null;
+    
+    const queryText = `
+        SELECT original_text, translated_text 
+        FROM translations 
+        WHERE user_id = $1 
+        ORDER BY created_at DESC 
+        LIMIT 10
+    `;
+    
+    const response: UserTranslationObject = { translations: [] };
+
+    try{
+        const result = await dbQuery(
+            queryText, 
+            [userId]
+        );
+
+        const translations = result?.rows ?? [];
+
+        translations.forEach((element: { original_text: string, translated_text: string }) => {
+            response.translations.push([element.original_text, element.translated_text]);
+        });
+
+        return response;
+    } catch(error){
+        console.error(error)
+        throw new Error(ERROR_MESSAGE.error_getting_history);
     }
 }

@@ -2,7 +2,7 @@ import http, {IncomingMessage, ServerResponse } from 'http';
 import { checkDBConnection } from './db';
 import { authenticateUser, registerUser } from './services/userService';
 import { ERROR_MESSAGE } from './services/Utility/util';
-import { translateText, TranslationResponse, TranslationRequest } from './services/translationService'
+import { translateText, TranslationResponse, TranslationRequest, getTranslationsByUserId } from './services/translationService'
 
 const PORT = 3000;
 const STATUS = {
@@ -39,6 +39,9 @@ const server = http.createServer(async (req: IncomingMessage, res: ServerRespons
         }
         else if (url === '/api/login' && method === 'POST'){
             await loginEndPoint(req, res);
+        }
+        else if (url && url.startsWith('/api/history') && method === 'GET'){
+            await historyEndpoint(req, res, url);            
         }
         else if(url === '/health' && method === 'GET'){
             res.writeHead(200);
@@ -121,6 +124,25 @@ async function parseBody(req: IncomingMessage): Promise<any> {
         })
     })
 } 
+
+async function historyEndpoint(req: IncomingMessage, res: ServerResponse<http.IncomingMessage>, url: string){
+    
+    try{
+        const parsedUrl = new URL(url, `http://${req.headers.host}`);
+        const userId = parsedUrl.searchParams.get('userId');
+
+        const responseData = await getTranslationsByUserId(Number(userId))
+
+        console.log(responseData)
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(responseData))
+    }catch(error){
+        console.error(error);
+        res.writeHead(500);
+        res.end(JSON.stringify({ error: ERROR.internal_server_error }));
+    }
+}
 
 async function loginEndPoint(req: IncomingMessage, res: ServerResponse<http.IncomingMessage>){
     try {
